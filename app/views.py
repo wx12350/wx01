@@ -112,23 +112,32 @@ def logOut(request):
 #         'saleCountTop10':saleCountTop10
 #     })
 
-from django.shortcuts import render
-from app.utils.getHomeData import getAnthorData, getNowTime, getHomeTagData
-
 def home(request):
-    a5Len, commentsLenTitle, provienceDicSort = getHomeTagData()
-    scoreTop10Data, saleCountTop10 = getAnthorData()
-    year, mon, day = getNowTime()
-    nowTime = {'year': year, 'mon': mon, 'day': day}
-    context = {
+    username = request.session.get('username')
+    userInfo = User.objects.get(username=username)
+    a5Len, commentsLenTitle, provienceDicSort = getHomeData.getHomeTagData()
+    # 获取评分排名前十的景点
+    scoreTop10Data = TravelInfo.objects.order_by('-score')[:10]
+    saleCountTop10 = getHomeData.getAnthorData()
+    year, mon, day = getHomeData.getNowTime()
+    geoData = getHomeData.getGeoData()
+    userBarCharData = getHomeData.getUserCreateTimeData()
+
+    return render(request, 'home.html', {
+        'userInfo': userInfo,
         'a5Len': a5Len,
         'commentsLenTitle': commentsLenTitle,
         'provienceDicSort': provienceDicSort,
         'scoreTop10Data': scoreTop10Data,
-        'saleCountTop10': saleCountTop10,
-        'nowTime': nowTime
-    }
-    return render(request, 'base.html', context)
+        'nowTime': {
+            'year': year,
+            'mon': getPublicData.monthList[mon - 1],
+            'day': day
+        },
+        'geoData': geoData,
+        'userBarCharData': userBarCharData,
+        'saleCountTop10': saleCountTop10
+    })
 
 
 
