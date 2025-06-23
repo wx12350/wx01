@@ -435,51 +435,102 @@ def cityCharDataTwo(province=None):
     return resultData
 
 
+# def getRateCharDataOne(province=None):
+#     # 在函数内部获取数据
+#     if province:
+#         travelList = TravelInfo.objects.filter(province=province)
+#     else:
+#         travelList = getPublicData.getAllTravelInfoMapData()
+#
+#     startDic = {}
+#     for travel in travelList:
+#         if startDic.get(travel.star, -1) == -1:
+#             startDic[travel.star] = 1
+#         else:
+#             startDic[travel.star] += 1
+#
+#     resultData = []
+#     for key, value in startDic.items():
+#         resultData.append({
+#             'name': key,
+#             'value': value
+#         })
+#
+#     return resultData
+
+
+
+
+
+
+# def getRateCharDataTwo(province=None):
+#     if province:
+#         travelList = TravelInfo.objects.filter(province=province)
+#     else:
+#         travelList = getPublicData.getAllTravelInfoMapData()
+#
+#     startDic = {}
+#     for travel in travelList:
+#         if startDic.get(travel.score, -1) == -1:
+#             startDic[travel.score] = 1
+#         else:
+#             startDic[travel.score] += 1
+#
+#     resultData = []
+#     for key, value in startDic.items():
+#         resultData.append({
+#             'name': key,
+#             'value': value
+#         })
+#
+#     return resultData
+
+
+
 def getRateCharDataOne(province=None):
-    # 在函数内部获取数据
     if province:
         travelList = TravelInfo.objects.filter(province=province)
     else:
-        travelList = getPublicData.getAllTravelInfoMapData()
-
+        travelList = TravelInfo.objects.all()
     startDic = {}
     for travel in travelList:
         if startDic.get(travel.star, -1) == -1:
             startDic[travel.star] = 1
         else:
             startDic[travel.star] += 1
-
     resultData = []
     for key, value in startDic.items():
         resultData.append({
             'name': key,
             'value': value
         })
-
     return resultData
 
 
+
+# wx01/app/utils/getEchartsData.py
 def getRateCharDataTwo(province=None):
     if province:
         travelList = TravelInfo.objects.filter(province=province)
     else:
-        travelList = getPublicData.getAllTravelInfoMapData()
-
+        travelList = TravelInfo.objects.all()
     startDic = {}
     for travel in travelList:
         if startDic.get(travel.score, -1) == -1:
             startDic[travel.score] = 1
         else:
             startDic[travel.score] += 1
-
     resultData = []
     for key, value in startDic.items():
         resultData.append({
             'name': key,
             'value': value
         })
-
     return resultData
+
+
+
+
 
 
 def getPriceCharDataOne(province=None):

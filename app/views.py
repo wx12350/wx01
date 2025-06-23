@@ -9,6 +9,10 @@ from app.utils import errorResponse,getHomeData,getPublicData,getChangeSelfInfoD
 from django.contrib.auth.hashers import check_password  # 用于安全验证密码
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.sessions.backends.db import SessionStore
+from django.shortcuts import render
+from app.models import TravelInfo
+from app.utils import getPublicData, getEchartsData
+
 
 #todo  新的登录模块代码
 def login(request):
@@ -83,30 +87,52 @@ def logOut(request):
     request.session.clear() #退出登录时，清除request.session
     return redirect('/app/login') #退出登录 转到登陆页面
 
+# def home(request):
+#     username = request.session.get('username')
+#     userInfo = User.objects.get(username=username)
+#     a5Len,commentsLenTitle,provienceDicSort = getHomeData.getHomeTagData()
+#     scoreTop10Data,saleCountTop10 = getHomeData.getAnthorData()
+#     year,mon,day = getHomeData.getNowTime()
+#     geoData = getHomeData.getGeoData()
+#     userBarCharData = getHomeData.getUserCreateTimeData()
+#     #字典
+#     return render(request,'home.html',{
+#         'userInfo':userInfo,
+#         'a5Len':a5Len,
+#         'commentsLenTitle':commentsLenTitle,
+#         'provienceDicSort':provienceDicSort,
+#         'scoreTop10Data':scoreTop10Data,
+#         'nowTime':{
+#             'year':year,
+#             'mon':getPublicData.monthList[mon - 1],
+#             'day':day
+#         },
+#         'geoData':geoData,
+#         'userBarCharData':userBarCharData,
+#         'saleCountTop10':saleCountTop10
+#     })
+
+from django.shortcuts import render
+from app.utils.getHomeData import getAnthorData, getNowTime, getHomeTagData
+
 def home(request):
-    username = request.session.get('username')
-    userInfo = User.objects.get(username=username)
-    a5Len,commentsLenTitle,provienceDicSort = getHomeData.getHomeTagData()
-    scoreTop10Data,saleCountTop10 = getHomeData.getAnthorData()
-    year,mon,day = getHomeData.getNowTime()
-    geoData = getHomeData.getGeoData()
-    userBarCharData = getHomeData.getUserCreateTimeData()
-    #字典
-    return render(request,'home.html',{
-        'userInfo':userInfo,
-        'a5Len':a5Len,
-        'commentsLenTitle':commentsLenTitle,
-        'provienceDicSort':provienceDicSort,
-        'scoreTop10Data':scoreTop10Data,
-        'nowTime':{
-            'year':year,
-            'mon':getPublicData.monthList[mon - 1],
-            'day':day
-        },
-        'geoData':geoData,
-        'userBarCharData':userBarCharData,
-        'saleCountTop10':saleCountTop10
-    })
+    a5Len, commentsLenTitle, provienceDicSort = getHomeTagData()
+    scoreTop10Data, saleCountTop10 = getAnthorData()
+    year, mon, day = getNowTime()
+    nowTime = {'year': year, 'mon': mon, 'day': day}
+    context = {
+        'a5Len': a5Len,
+        'commentsLenTitle': commentsLenTitle,
+        'provienceDicSort': provienceDicSort,
+        'scoreTop10Data': scoreTop10Data,
+        'saleCountTop10': saleCountTop10,
+        'nowTime': nowTime
+    }
+    return render(request, 'base.html', context)
+
+
+
+
 
 def changeSelfInfo(request):
     username = request.session.get('username')
@@ -446,6 +472,54 @@ def cityChar(request):
 
 # ... 前面代码保持不变 ...
 #wx  2025.6.12
+# def rateChar(request):
+#     username = request.session.get('username')
+#     userInfo = User.objects.get(username=username)
+#     year, mon, day = getHomeData.getNowTime()
+#
+#     # 获取所有省份列表
+#     provinces = sorted(TravelInfo.objects.values_list('province', flat=True).distinct())
+#
+#     # 设置默认省份
+#     default_province = ""
+#     if provinces:
+#         default_province = provinces[0]
+#     else:
+#         # 如果没有省份数据，尝试获取默认省份
+#         try:
+#             first_travel = TravelInfo.objects.first()
+#             if first_travel:
+#                 default_province = first_travel.province
+#             else:
+#                 default_province = "北京"
+#         except:
+#             default_province = "北京"
+#
+#     # 获取当前省份参数
+#     province = request.POST.get('province', default_province)
+#
+#     # 使用省份参数获取图表数据
+#     charOneData = getEchartsData.getRateCharDataOne(province=province)
+#     charTwoData = getEchartsData.getRateCharDataTwo(province=province)
+#
+#     return render(request, 'rateChar.html', {
+#         'userInfo': userInfo,
+#         'nowTime': {
+#             'year': year,
+#             'mon': getPublicData.monthList[mon - 1],
+#             'day': day
+#         },
+#         'provinces': provinces,  # 传递省份列表给模板
+#         'selected_province': province,  # 当前选中的省份
+#         'charOneData': charOneData,
+#         'charTwoData': charTwoData
+#     })
+
+# app/views.py
+
+import datetime
+
+# wx01/app/views.py
 def rateChar(request):
     username = request.session.get('username')
     userInfo = User.objects.get(username=username)
@@ -459,7 +533,6 @@ def rateChar(request):
     if provinces:
         default_province = provinces[0]
     else:
-        # 如果没有省份数据，尝试获取默认省份
         try:
             first_travel = TravelInfo.objects.first()
             if first_travel:
@@ -473,8 +546,8 @@ def rateChar(request):
     province = request.POST.get('province', default_province)
 
     # 使用省份参数获取图表数据
-    charOneData = getEchartsData.getRateCharDataOne(province=province)
-    charTwoData = getEchartsData.getRateCharDataTwo(province=province)
+    charOneData = getEchartsData.getRateCharDataOne(province)
+    charTwoData = getEchartsData.getRateCharDataTwo(province)
 
     return render(request, 'rateChar.html', {
         'userInfo': userInfo,
@@ -488,7 +561,6 @@ def rateChar(request):
         'charOneData': charOneData,
         'charTwoData': charTwoData
     })
-
 
 # ... 删除文件末尾重复的 rateChar 函数定义 ...
 

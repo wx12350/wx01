@@ -44,6 +44,42 @@ class spider(object):
                     'saleCount'
                 ])
 
+    def save_to_sql(self):
+        # 读取CSV数据到DataFrame
+        df = pd.read_csv('tempData.csv', encoding='utf8')
+
+        # 预处理：以title字段进行去重（保留最后出现的记录）
+        df.drop_duplicates(subset='title', keep='last', inplace=True)
+
+        # 将去重后的数据保存回CSV（可选）
+        df.to_csv('tempData.csv', index=False, encoding='utf8')
+
+        # 导入数据库
+        for _, travel in df.iterrows():
+            try:
+                TravelInfo.objects.create(
+                    title=travel['title'],
+                    level=travel['level'],
+                    province=travel['province'],
+                    star=travel['star'],
+                    detailAddress=travel['detailAddress'],
+                    shortIntro=travel['shortIntro'],
+                    detailUrl=travel['detailUrl'],
+                    score=travel['score'],
+                    price=travel['price'],
+                    commentsLen=travel['commentsTotal'],
+                    detailIntro=travel['detailIntro'],
+                    img_list=travel['img_list'],
+                    comments=travel['comments'],
+                    cover=travel['cover'],
+                    discount=travel['discount'],
+                    saleCount=travel['saleCount']
+                )
+            except Exception as e:
+                print(f"插入数据失败: {e}")
+                continue
+
+
     def send_request(self,url):
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
@@ -181,3 +217,5 @@ if __name__ == '__main__':
     spiderObj.init()
     spiderObj.start()
     spiderObj.save_to_sql()
+
+
